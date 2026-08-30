@@ -1,0 +1,108 @@
+{
+  "Logistic Regression": {
+    "model": "Logistic Regression",
+    "kind": "sklearn",
+    "artifact": "/kaggle/working/artifacts/logistic_regression.joblib",
+    "config": "{'class': 'LogisticRegression', 'C': 1.0, 'max_iter': 2000, 'class_weight': 'balanced', 'random_state': 42}",
+    "cfg": null,
+    "val_accuracy": 0.7705,
+    "val_macro_f1": 0.7307,
+    "train_seconds": 14.6
+  },
+  "Random Forest": {
+    "model": "Random Forest",
+    "kind": "sklearn",
+    "artifact": "/kaggle/working/artifacts/random_forest.joblib",
+    "config": "{'class': 'RandomForestClassifier', 'n_estimators': 400, 'max_depth': 50, 'min_samples_leaf': 2, 'class_weight': 'balanced_subsample', 'n_jobs': -1, 'random_state': 42}",
+    "cfg": null,
+    "val_accuracy": 0.7168,
+    "val_macro_f1": 0.6453,
+    "train_seconds": 78.0
+  },
+  "Naive Bayes": {
+    "model": "Naive Bayes",
+    "kind": "sklearn",
+    "artifact": "/kaggle/working/artifacts/naive_bayes.joblib",
+    "config": "{'class': 'ComplementNB', 'alpha': 0.3}",
+    "cfg": null,
+    "val_accuracy": 0.6986,
+    "val_macro_f1": 0.6102,
+    "train_seconds": 0.0
+  },
+  "SimpleRNN": {
+    "model": "SimpleRNN",
+    "kind": "keras",
+    "artifact": "/kaggle/working/artifacts/simplernn.keras",
+    "config": "{'units': 64, 'dropout': 0.2, 'emb': 'glove', 'trainable_emb': False, 'lr': 0.0005, 'batch': 128, 'epochs': 8}",
+    "cfg": null,
+    "val_accuracy": 0.4985,
+    "val_macro_f1": 0.3476,
+    "train_seconds": 43.1
+  },
+  "Bidirectional SimpleRNN": {
+    "model": "Bidirectional SimpleRNN",
+    "kind": "keras",
+    "artifact": "/kaggle/working/artifacts/bidirectional_simplernn.keras",
+    "config": "{'units': 64, 'dropout': 0.3, 'emb': 'word2vec', 'trainable_emb': False, 'lr': 0.001, 'batch': 64, 'epochs': 8}",
+    "cfg": null,
+    "val_accuracy": 0.5647,
+    "val_macro_f1": 0.4436,
+    "train_seconds": 102.2
+  },
+  "GRU": {
+    "model": "GRU",
+    "kind": "keras",
+    "artifact": "/kaggle/working/artifacts/gru.keras",
+    "config": "{'units': 64, 'dropout': 0.3, 'emb': 'word2vec', 'trainable_emb': False, 'lr': 0.001, 'batch': 64, 'epochs': 8}",
+    "cfg": null,
+    "val_accuracy": 0.7292,
+    "val_macro_f1": 0.6895,
+    "train_seconds": 52.1
+  },
+  "Bidirectional GRU": {
+    "model": "Bidirectional GRU",
+    "kind": "keras",
+    "artifact": "/kaggle/working/artifacts/bidirectional_gru.keras",
+    "config": "{'units': 64, 'dropout': 0.3, 'emb': 'word2vec', 'trainable_emb': False, 'lr': 0.001, 'batch': 64, 'epochs': 8}",
+    "cfg": null,
+    "val_accuracy": 0.7638,
+    "val_macro_f1": 0.727,
+    "train_seconds": 75.4
+  },
+  "LSTM": {
+    "model": "LSTM",
+    "kind": "keras",
+    "artifact": "/kaggle/working/artifacts/lstm.keras",
+    "config": "{'units': 128, 'dropout': 0.5, 'emb': 'glove', 'trainable_emb': True, 'lr': 0.001, 'batch': 64, 'epochs': 8}",
+    "cfg": null,
+    "val_accuracy": 0.7535,
+    "val_macro_f1": 0.6966,
+    "train_seconds": 51.0
+  },
+  "Bidirectional LSTM": {
+    "model": "Bidirectional LSTM",
+    "kind": "keras",
+    "artifact": "/kaggle/working/artifacts/bidirectional_lstm.keras",
+    "config": "{'units': 128, 'dropout': 0.5, 'emb': 'glove', 'trainable_emb': True, 'lr': 0.001, 'batch': 64, 'epochs': 8}",
+    "cfg": null,
+    "val_accuracy": 0.7537,
+    "val_macro_f1": 0.7189,
+    "train_seconds": 71.2
+  },
+  "BERT Base": {
+    "model": "BERT Base",
+    "kind": "bert",
+    "artifact": "/kaggle/working/artifacts/bert_base",
+    "config": "{'lr': 3e-05, 'batch': 32, 'epochs': 2, 'max_len': 192, 'class_weighted': True}",
+    "cfg": {
+      "lr": 3e-05,
+      "batch": 32,
+      "epochs": 2,
+      "max_len": 192,
+      "class_weighted": true
+    },
+    "val_accuracy": 0.8149,
+    "val_macro_f1": 0.7922,
+    "train_seconds": 2343.7
+  }
+}

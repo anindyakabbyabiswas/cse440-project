@@ -1,0 +1,4 @@
+strategy,vocab_size,val_accuracy,val_macro_f1
+prep_minimal,20000,0.7705,0.7307
+prep_lemma,20000,0.751,0.7052
+prep_stem,20000,0.7505,0.7024

@@ -1,0 +1,11 @@
+Model,Best config,Test Accuracy,Test Macro F1,Test Weighted F1,Val Macro F1,Train seconds
+BERT Base,"{'lr': 3e-05, 'batch': 32, 'epochs': 2, 'max_len': 192, 'class_weighted': True}",0.8058,0.7796,0.8074,0.7922,2343.7
+Bidirectional GRU,"{'units': 64, 'dropout': 0.3, 'emb': 'word2vec', 'trainable_emb': False, 'lr': 0.001, 'batch': 64, 'epochs': 8}",0.7619,0.7238,0.7637,0.727,75.4
+Logistic Regression,"{'class': 'LogisticRegression', 'C': 1.0, 'max_iter': 2000, 'class_weight': 'balanced', 'random_state': 42}",0.7652,0.7136,0.7657,0.7307,14.6
+Bidirectional LSTM,"{'units': 128, 'dropout': 0.5, 'emb': 'glove', 'trainable_emb': True, 'lr': 0.001, 'batch': 64, 'epochs': 8}",0.7437,0.7086,0.7409,0.7189,71.2
+LSTM,"{'units': 128, 'dropout': 0.5, 'emb': 'glove', 'trainable_emb': True, 'lr': 0.001, 'batch': 64, 'epochs': 8}",0.7454,0.6979,0.7421,0.6966,51.0
+GRU,"{'units': 64, 'dropout': 0.3, 'emb': 'word2vec', 'trainable_emb': False, 'lr': 0.001, 'batch': 64, 'epochs': 8}",0.7265,0.6862,0.7229,0.6895,52.1
+Random Forest,"{'class': 'RandomForestClassifier', 'n_estimators': 400, 'max_depth': 50, 'min_samples_leaf': 2, 'class_weight': 'balanced_subsample', 'n_jobs': -1, 'random_state': 42}",0.7088,0.6383,0.7026,0.6453,78.0
+Naive Bayes,"{'class': 'ComplementNB', 'alpha': 0.3}",0.698,0.611,0.6913,0.6102,0.0
+Bidirectional SimpleRNN,"{'units': 64, 'dropout': 0.3, 'emb': 'word2vec', 'trainable_emb': False, 'lr': 0.001, 'batch': 64, 'epochs': 8}",0.556,0.4353,0.5363,0.4436,102.2
+SimpleRNN,"{'units': 64, 'dropout': 0.2, 'emb': 'glove', 'trainable_emb': False, 'lr': 0.0005, 'batch': 128, 'epochs': 8}",0.4838,0.3324,0.478,0.3476,43.1
