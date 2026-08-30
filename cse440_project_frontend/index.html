@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mental Health Classifier</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:       #070d1a;
+  --s1:       #0d1b2e;
+  --s2:       #132338;
+  --s3:       #1a2f47;
+  --border:   #1e3a5f;
+  --text:     #e2e8f0;
+  --muted:    #64748b;
+  --soft:     #94a3b8;
+  --teal:     #7dd3d0;
+  --teal-d:   #5ab8b5;
+  --lavender: #a5b4fc;
+  --danger:   #f87171;
+  --r:        12px;
+  --mono:     "JetBrains Mono", monospace;
+  --sans:     "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
+html{scroll-behavior:smooth}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--sans);
+  font-size:16px;
+  line-height:1.65;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+/* ── Ambient glow ── */
+body::before{
+  content:"";
+  position:fixed;
+  top:-200px; left:50%;
+  transform:translateX(-50%);
+  width:800px; height:500px;
+  background:radial-gradient(ellipse at center, rgba(125,211,208,.06) 0%, transparent 70%);
+  pointer-events:none;
+  z-index:0;
+}
+
+.wrap{
+  max-width:700px;
+  margin:0 auto;
+  padding:60px 20px 100px;
+  position:relative;
+  z-index:1;
+}
+
+/* ── Hero ── */
+.hero{margin-bottom:48px;text-align:center;}
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-family:var(--mono);
+  font-size:10px;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  color:var(--teal);
+  border:1px solid rgba(125,211,208,.25);
+  border-radius:20px;
+  padding:5px 14px;
+  margin-bottom:24px;
+  background:rgba(125,211,208,.05);
+}
+.badge-dot{
+  width:6px;height:6px;
+  border-radius:50%;
+  background:var(--teal);
+  animation:pulse-dot 2s ease infinite;
+}
+@keyframes pulse-dot{
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:.4;transform:scale(.7)}
+}
+
+h1{
+  font-size:clamp(26px,5vw,42px);
+  font-weight:700;
+  letter-spacing:-.03em;
+  line-height:1.15;
+  margin-bottom:16px;
+}
+h1 .gradient{
+  background:linear-gradient(135deg, var(--teal) 0%, var(--lavender) 100%);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+
+.subtitle{
+  color:var(--soft);
+  font-size:15px;
+  max-width:46ch;
+  margin:0 auto;
+  font-weight:400;
+}
+
+/* ── Input card ── */
+.input-card{
+  background:var(--s1);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:28px;
+  margin-bottom:16px;
+  transition:border-color .3s;
+}
+.input-card:focus-within{border-color:rgba(125,211,208,.4);}
+
+.field-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
+}
+.field-label{
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.char-cnt{
+  font-family:var(--mono);
+  font-size:11px;
+  color:var(--muted);
+}
+
+textarea{
+  width:100%;
+  min-height:140px;
+  padding:16px;
+  background:var(--bg);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:8px;
+  font:inherit;
+  font-size:15px;
+  resize:vertical;
+  transition:border-color .2s;
+  line-height:1.7;
+}
+textarea::placeholder{color:var(--muted);opacity:.7}
+textarea:focus{outline:none;border-color:rgba(125,211,208,.5)}
+
+.controls{
+  display:flex;
+  gap:10px;
+  margin-top:16px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+.model-pill{
+  display:flex;
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:8px;
+  overflow:hidden;
+  flex:1;
+  min-width:200px;
+}
+.model-opt{
+  flex:1;
+  padding:9px 14px;
+  font:inherit;
+  font-size:13px;
+  font-family:var(--mono);
+  color:var(--muted);
+  background:transparent;
+  border:none;
+  cursor:pointer;
+  transition:all .2s;
+  text-align:center;
+  white-space:nowrap;
+}
+.model-opt.active{
+  background:rgba(125,211,208,.12);
+  color:var(--teal);
+}
+.model-opt:hover:not(.active){color:var(--soft);background:var(--s2)}
+
+.analyse-btn{
+  font:inherit;
+  font-weight:600;
+  font-size:14px;
+  padding:10px 28px;
+  background:linear-gradient(135deg,var(--teal) 0%,var(--teal-d) 100%);
+  color:var(--bg);
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  transition:opacity .2s, transform .15s;
+  white-space:nowrap;
+}
+.analyse-btn:hover:not(:disabled){opacity:.9;transform:translateY(-1px)}
+.analyse-btn:active:not(:disabled){transform:translateY(0)}
+.analyse-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.analyse-btn:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+
+/* ── Samples ── */
+.samples{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:16px;
+}
+.sample{
+  font:inherit;
+  font-size:12px;
+  padding:5px 13px;
+  background:transparent;
+  color:var(--muted);
+  border:1px solid var(--border);
+  border-radius:20px;
+  cursor:pointer;
+  transition:all .2s;
+}
+.sample:hover{
+  border-color:rgba(125,211,208,.4);
+  color:var(--teal);
+  background:rgba(125,211,208,.06);
+}
+
+/* ── Result area ── */
+#result{margin-top:8px}
+
+.result-card{
+  background:var(--s1);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  overflow:hidden;
+  animation:slideUp .4s cubic-bezier(.16,1,.3,1);
+}
+@keyframes slideUp{
+  from{opacity:0;transform:translateY(16px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* top classification banner */
+.top-banner{
+  padding:28px 28px 24px;
+  border-bottom:1px solid var(--border);
+  background:linear-gradient(135deg, var(--s2) 0%, var(--s1) 100%);
+}
+.top-label{
+  font-family:var(--mono);
+  font-size:10px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:8px;
+}
+.top-class{
+  font-size:32px;
+  font-weight:700;
+  letter-spacing:-.02em;
+  margin-bottom:6px;
+}
+.top-meta{
+  display:flex;
+  gap:20px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.top-conf{
+  font-family:var(--mono);
+  font-size:13px;
+  color:var(--soft);
+}
+.top-conf strong{color:var(--teal)}
+.model-tag{
+  font-family:var(--mono);
+  font-size:11px;
+  padding:3px 10px;
+  background:rgba(125,211,208,.1);
+  color:var(--teal);
+  border-radius:20px;
+  border:1px solid rgba(125,211,208,.2);
+}
+
+/* ── Rings ── */
+.rings-section{padding:28px}
+.rings-title{
+  font-size:11px;
+  font-family:var(--mono);
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:24px;
+}
+.rings-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(110px,1fr));
+  gap:20px;
+}
+.ring-wrap{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  opacity:0;
+  animation:ringIn .5s cubic-bezier(.16,1,.3,1) forwards;
+}
+@keyframes ringIn{
+  from{opacity:0;transform:scale(.85)}
+  to{opacity:1;transform:scale(1)}
+}
+
+.ring-svg{overflow:visible}
+.ring-track{fill:none;stroke:var(--s3);stroke-width:5}
+.ring-arc{
+  fill:none;stroke-width:5;
+  stroke-linecap:round;
+  transform-origin:50% 50%;
+  transform:rotate(-90deg);
+  transition:stroke-dashoffset .9s cubic-bezier(.4,0,.2,1);
+}
+
+.ring-pct{
+  font-family:var(--mono);
+  font-size:13px;
+  font-weight:500;
+  text-align:center;
+}
+.ring-name{
+  font-size:11px;
+  color:var(--muted);
+  text-align:center;
+  line-height:1.3;
+  max-width:100px;
+}
+.ring-wrap.is-top .ring-name{
+  color:var(--text);
+  font-weight:600;
+}
+
+/* glow pulse on animate in */
+.ring-wrap.is-top .ring-arc{
+  filter:drop-shadow(0 0 6px currentColor);
+  animation:ringIn .5s cubic-bezier(.16,1,.3,1) forwards,
+             glowPulse .6s ease .9s 1;
+}
+@keyframes glowPulse{
+  0%{filter:drop-shadow(0 0 2px currentColor)}
+  50%{filter:drop-shadow(0 0 12px currentColor)}
+  100%{filter:drop-shadow(0 0 4px currentColor)}
+}
+
+/* ── Follow-up (chat style) ── */
+.followup-section{
+  padding:0 28px 28px;
+  border-top:1px solid var(--border);
+}
+.chat-header{
+  padding:20px 0 16px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.chat-icon{
+  width:32px;height:32px;
+  background:rgba(125,211,208,.12);
+  border:1px solid rgba(125,211,208,.25);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;
+}
+.chat-name{font-size:13px;font-weight:600;color:var(--teal)}
+.chat-sub{font-size:11px;color:var(--muted)}
+
+.chat-bubble{
+  background:var(--s2);
+  border:1px solid var(--border);
+  border-radius:4px 12px 12px 12px;
+  padding:12px 16px;
+  font-size:14px;
+  color:var(--soft);
+  margin-bottom:16px;
+  max-width:90%;
+  opacity:0;
+  transform:translateY(8px);
+  transition:opacity .3s ease, transform .3s ease;
+}
+.chat-bubble.show{opacity:1;transform:translateY(0)}
+
+.q-item{
+  margin-bottom:14px;
+  opacity:0;
+  transform:translateY(8px);
+  transition:opacity .3s ease, transform .3s ease;
+}
+.q-item.show{opacity:1;transform:translateY(0)}
+.q-label{font-size:13px;font-weight:500;color:var(--text);margin-bottom:6px}
+.q-input{
+  width:100%;
+  padding:10px 14px;
+  background:var(--bg);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:8px;
+  font:inherit;
+  font-size:14px;
+  transition:border-color .2s;
+}
+.q-input:focus{outline:none;border-color:rgba(125,211,208,.5)}
+.q-input::placeholder{color:var(--muted);opacity:.6}
+
+.reanalyse-row{
+  margin-top:20px;
+  opacity:0;
+  transform:translateY(8px);
+  transition:opacity .3s ease, transform .3s ease;
+}
+.reanalyse-row.show{opacity:1;transform:translateY(0)}
+.reanalyse-btn{
+  font:inherit;
+  font-size:13px;
+  font-weight:600;
+  padding:10px 22px;
+  background:transparent;
+  color:var(--teal);
+  border:1px solid rgba(125,211,208,.4);
+  border-radius:8px;
+  cursor:pointer;
+  transition:all .2s;
+}
+.reanalyse-btn:hover{background:rgba(125,211,208,.1);border-color:var(--teal)}
+.reanalyse-btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* ── Note ── */
+.result-note{
+  padding:16px 28px;
+  border-top:1px solid var(--border);
+  font-family:var(--mono);
+  font-size:11px;
+  color:var(--muted);
+  display:flex;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+/* ── Crisis ── */
+.crisis-card{
+  background:rgba(248,113,113,.05);
+  border:1px solid rgba(248,113,113,.3);
+  border-radius:var(--r);
+  padding:28px;
+  animation:slideUp .4s cubic-bezier(.16,1,.3,1);
+}
+.crisis-head{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:16px;
+}
+.crisis-icon{font-size:20px}
+.crisis-title{font-size:18px;font-weight:700;color:#fca5a5}
+.crisis-body{font-size:14px;color:var(--soft);line-height:1.8}
+.crisis-body strong{color:var(--text)}
+.crisis-body ul{padding-left:18px;margin:12px 0}
+.crisis-body li{margin-bottom:8px}
+
+/* ── Loading ── */
+.loading-card{
+  background:var(--s1);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:40px 28px;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  animation:slideUp .3s ease;
+}
+.spinner{
+  width:22px;height:22px;
+  border:2px solid var(--border);
+  border-top-color:var(--teal);
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+  flex-shrink:0;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:14px;color:var(--soft)}
+
+/* ── Error ── */
+.err-card{
+  background:rgba(248,113,113,.05);
+  border:1px solid rgba(248,113,113,.2);
+  border-radius:var(--r);
+  padding:20px 24px;
+  color:#fca5a5;
+  font-size:14px;
+  animation:slideUp .3s ease;
+}
+
+/* ── Footer ── */
+footer{
+  margin-top:60px;
+  text-align:center;
+  font-size:12px;
+  color:var(--muted);
+  line-height:1.8;
+}
+footer a{color:var(--soft);text-decoration:none}
+footer a:hover{color:var(--teal)}
+
+/* ── Responsive ── */
+@media(max-width:520px){
+  .wrap{padding:32px 16px 60px}
+  .rings-grid{grid-template-columns:repeat(3,1fr);gap:14px}
+  .top-class{font-size:24px}
+  h1{font-size:26px}
+  .model-opt{font-size:11px;padding:8px 10px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .ring-arc{transition:none}
+  .result-card,.ring-wrap,.chat-bubble,.q-item,.reanalyse-row{animation:none;transition:none;opacity:1;transform:none}
+  .badge-dot{animation:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="badge"><span class="badge-dot"></span>AI · NLP · Mental Health</div>
+    <h1>Multi-Class <span class="gradient">Mental Health</span><br>Statement Classification</h1>
+    <p class="subtitle">Write how you've been feeling. The model reads it and maps it across seven mental-health categories — showing you the full picture.</p>
+  </div>
+
+  <!-- Input -->
+  <div class="input-card">
+    <div class="field-row">
+      <span class="field-label">Your statement</span>
+      <span class="char-cnt"><span id="chars">0</span> / 3000</span>
+    </div>
+    <textarea
+      id="text"
+      placeholder="I haven't been sleeping and everything feels heavy lately…"
+      maxlength="3000"
+      spellcheck="true"
+      rows="5"
+    ></textarea>
+
+    <div class="controls">
+      <div class="model-pill" role="group" aria-label="Model selection">
+        <button class="model-opt active" data-model="lr" id="btn-lr">Logistic Regression</button>
+        <button class="model-opt" data-model="bert" id="btn-bert">BERT Base</button>
+      </div>
+      <button class="analyse-btn" id="go">Analyse →</button>
+    </div>
+
+    <div class="samples" id="samples"></div>
+  </div>
+
+  <!-- Results -->
+  <div id="result"></div>
+
+  <footer>
+    <p>Multi-Class Mental Health Statement Classification Diagnostic Chatbot</p>
+    <p style="margin-top:6px">Not a diagnostic tool · Nothing logged · For research purposes only</p>
+  </footer>
+
+</div>
+
+<script>
+const RAILWAY = "https://cse440projectsrakbar-production.up.railway.app"; // ← REPLACE THIS
+
+const CONFIDENCE_FLOOR = 0.45;
+const CRISIS_CLASS     = "Suicidal";
+const CRISIS_THRESHOLD = 0.25;
+
+const COLORS = {
+  "Anxiety":              "#f59e0b",
+  "Bipolar":              "#a78bfa",
+  "Depression":           "#60a5fa",
+  "Normal":               "#34d399",
+  "Personality disorder": "#f472b6",
+  "Stress":               "#fb923c",
+  "Suicidal":             "#f87171",
+};
+
+const SAMPLES = [
+  "I haven't slept properly in weeks, nothing interests me",
+  "Great day — went out with friends, feeling good",
+  "Heart races before every meeting, can't catch my breath",
+  "Moods swing between invincible and completely worthless",
+];
+
+const QUESTIONS = [
+  "How long have you been feeling this way?",
+  "How has your sleep been — too much, too little, or disrupted?",
+  "Has your appetite or energy changed recently?",
+  "Are you still doing things you normally enjoy?",
+  "Have you spoken to anyone about how you're feeling?",
+];
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c =>
+  ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])
+);
+
+// Model toggle
+let selectedModel = "lr";
+document.querySelectorAll(".model-opt").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".model-opt").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    selectedModel = btn.dataset.model;
+  });
+});
+
+// Char count
+$("text").addEventListener("input", () => {
+  $("chars").textContent = $("text").value.length;
+});
+$("text").addEventListener("keydown", e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") run();
+});
+
+// Samples
+$("samples").innerHTML = SAMPLES.map((s, i) =>
+  `<button class="sample" data-i="${i}">${esc(s)}</button>`
+).join("");
+$("samples").addEventListener("click", e => {
+  const btn = e.target.closest(".sample");
+  if (!btn) return;
+  $("text").value = SAMPLES[+btn.dataset.i];
+  $("chars").textContent = $("text").value.length;
+  run();
+});
+
+// API
+async function callAPI(text, model) {
+  const url = model === "bert"
+    ? `${RAILWAY}/predict/bert`
+    : `${RAILWAY}/predict/lr`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text }),
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  return data;
+}
+
+// Build ring
+function ring(label, prob, color, delay, isTop) {
+  const r = 40, C = 2 * Math.PI * r;
+  const offset = C * (1 - prob);
+  const pct = Math.round(prob * 100);
+  return `
+    <div class="ring-wrap${isTop?" is-top":""}" style="animation-delay:${delay}ms">
+      <svg class="ring-svg" width="96" height="96" viewBox="0 0 96 96">
+        <circle class="ring-track" cx="48" cy="48" r="${r}"/>
+        <circle class="ring-arc"
+          cx="48" cy="48" r="${r}"
+          stroke="${color}"
+          stroke-dasharray="${C}"
+          stroke-dashoffset="${C}"
+          data-target="${offset}"
+          style="color:${color};transition-delay:${delay+100}ms"
+        />
+        <text x="48" y="53" text-anchor="middle"
+          font-family="JetBrains Mono,monospace"
+          font-size="13" font-weight="500"
+          fill="${color}">${pct}%</text>
+      </svg>
+      <div class="ring-name">${esc(label)}</div>
+    </div>`;
+}
+
+function animateRings() {
+  document.querySelectorAll(".ring-arc").forEach(el => {
+    requestAnimationFrame(() => {
+      el.style.strokeDashoffset = el.dataset.target;
+    });
+  });
+}
+
+function renderRings(dist) {
+  return `
+    <div class="rings-section">
+      <div class="rings-title">Probability distribution across all classes</div>
+      <div class="rings-grid">
+        ${dist.map((d, i) => ring(d.label, d.probability, COLORS[d.label]||"#94a3b8", i*70, i===0)).join("")}
+      </div>
+    </div>`;
+}
+
+// Follow-up
+function renderFollowup(originalText) {
+  const qs = QUESTIONS.map((q, i) => `
+    <div class="q-item" id="q-${i}">
+      <div class="q-label">→ ${esc(q)}</div>
+      <input class="q-input" type="text" placeholder="Your answer…" autocomplete="off">
+    </div>`).join("");
+
+  return `
+    <div class="followup-section">
+      <div class="chat-header">
+        <div class="chat-icon">🤔</div>
+        <div>
+          <div class="chat-name">Classifier</div>
+          <div class="chat-sub">needs a bit more context</div>
+        </div>
+      </div>
+      <div class="chat-bubble" id="chat-msg">
+        Your statement was spread across several categories and I'm not confident enough to give you a clear reading. 
+        Answer one or more of these questions and I'll try again.
+      </div>
+      ${qs}
+      <div class="reanalyse-row" id="reanalyse-row">
+        <button class="reanalyse-btn" id="reanalyse">Re-analyse with more context →</button>
+      </div>
+    </div>`;
+}
+
+// Appear chat items with delay
+function animateFollowup() {
+  const msg = document.getElementById("chat-msg");
+  if (msg) setTimeout(() => msg.classList.add("show"), 100);
+  QUESTIONS.forEach((_, i) => {
+    const el = document.getElementById(`q-${i}`);
+    if (el) setTimeout(() => el.classList.add("show"), 300 + i * 120);
+  });
+  const row = document.getElementById("reanalyse-row");
+  if (row) setTimeout(() => row.classList.add("show"), 300 + QUESTIONS.length * 120 + 100);
+}
+
+// Render result
+function renderResult(data) {
+  const dist = Array.isArray(data.distribution)
+  ? [...data.distribution].sort((a, b) => b.probability - a.probability)
+  : [];
+
+  const top = data.top || (dist[0] ?? null);
+
+  if (!dist.length || !top) {
+    $("result").innerHTML = `<div class="err-card">Unexpected response from the model. Try again.</div>`;
+    return;
+  }
+  const topColor = COLORS[top.label] || "var(--teal)";
+
+  // Crisis
+  const crisisEntry = dist.find(d => d.label === CRISIS_CLASS);
+  if (crisisEntry && crisisEntry.probability >= CRISIS_THRESHOLD) {
+    $("result").innerHTML = `
+      <div class="crisis-card">
+        <div class="crisis-head">
+          <span class="crisis-icon">💙</span>
+          <div class="crisis-title">Please reach out to someone</div>
+        </div>
+        <div class="crisis-body">
+          <p>Some of what you wrote resembles language associated with serious distress.
+          A text classifier isn't the right response to this — a person is.</p>
+          <ul>
+            <li><strong>Kaan Pete Roi</strong> — emotional support helpline · <strong>kaanpeteroi.org</strong></li>
+            <li><strong>NIMH Dhaka</strong> — National Institute of Mental Health, emergency psychiatric services</li>
+            <li>If you're in immediate danger, contact emergency services or go to your nearest hospital</li>
+          </ul>
+          <p>You deserve support from someone who can actually be there with you.</p>
+        </div>
+      </div>`;
+    return;
+  }
+
+  // Low confidence
+  if (data.confidence_low) {
+    $("result").innerHTML = `
+      <div class="result-card">
+        <div class="top-banner">
+          <div class="top-label">Confidence too low — need more context</div>
+          <div class="top-class" style="color:var(--soft);font-size:22px">Uncertain</div>
+          <div class="top-meta">
+            <div class="top-conf">Closest match: <strong>${esc(top.label)}</strong> at ${Math.round(top.probability*100)}%</div>
+            <div class="model-tag">${esc(data.model)}</div>
+          </div>
+        </div>
+        ${renderRings(dist)}
+        ${renderFollowup()}
+        <div class="result-note">
+          <span>${dist.length} classes evaluated</span>
+          <span>Threshold: ${Math.round(CONFIDENCE_FLOOR*100)}%</span>
+        </div>
+      </div>`;
+
+    animateRings();
+    animateFollowup();
+
+    $("reanalyse").addEventListener("click", async () => {
+      const answers = Array.from(document.querySelectorAll(".q-input"))
+        .map(i => i.value.trim()).filter(Boolean);
+      if (!answers.length) {
+        alert("Please answer at least one question.");
+        return;
+      }
+      const combined = $("text").value.trim() + " " + answers.join(" ");
+      $("reanalyse").disabled = true;
+      $("reanalyse").textContent = "Re-analysing…";
+      try {
+        const data2 = await callAPI(combined, selectedModel);
+        renderResult(data2);
+      } catch (e) {
+        $("result").innerHTML = `<div class="err-card">Re-analysis failed: ${esc(e.message)}</div>`;
+      }
+    });
+    return;
+  }
+
+  // Normal result
+  $("result").innerHTML = `
+    <div class="result-card">
+      <div class="top-banner">
+        <div class="top-label">Top classification</div>
+        <div class="top-class" style="color:${topColor}">${esc(top.label)}</div>
+        <div class="top-meta">
+          <div class="top-conf">Confidence: <strong>${Math.round(top.probability*100)}%</strong></div>
+          <div class="model-tag">${esc(data.model)}</div>
+        </div>
+      </div>
+      ${renderRings(dist)}
+      <div class="result-note">
+        <span>${dist.length} classes evaluated</span>
+        <span>Threshold: ${Math.round(CONFIDENCE_FLOOR*100)}%</span>
+      </div>
+    </div>`;
+
+  animateRings();
+}
+
+// Main
+async function run() {
+  const text = $("text").value.trim();
+  if (!text) { $("text").focus(); return; }
+
+  $("go").disabled = true;
+  $("go").textContent = "Analysing…";
+  $("result").innerHTML = `
+    <div class="loading-card">
+      <div class="spinner"></div>
+      <div class="loading-text">Reading your statement${selectedModel==="bert"?" (BERT may take a moment on first call)…":"…"}</div>
+    </div>`;
+
+  try {
+    const data = await callAPI(text, selectedModel);
+    renderResult(data);
+  } catch (e) {
+    $("result").innerHTML = `<div class="err-card">${esc(e.message||"Something went wrong. Check your connection and try again.")}</div>`;
+  } finally {
+    $("go").disabled = false;
+    $("go").textContent = "Analyse →";
+  }
+}
+
+$("go").addEventListener("click", run);
+</script>
+</body>
+</html>
